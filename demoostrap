@@ -1,0 +1,192 @@
+#!/usr/bin/python3
+
+# Copyright © 2014 Jakub Wilk <jwilk@debian.org>
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the “Software”), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+import argparse
+import errno
+import functools
+import os
+import subprocess as ipc
+
+import debian.deb822 as deb
+
+def get_dpkg_architecture():
+    cmdline = ['dpkg', '--print-architecture']
+    output = ipc.check_output(cmdline)
+    return output.strip().decode('ASCII')
+
+class Package(object):
+
+    def __init__(self, name, architecture, *, essential=False, depends='', pre_depends=''):
+        self.name = name
+        self.architecture = architecture
+        self.essential = essential
+        depends = ', '.join(
+            d for d in [depends, pre_depends] if d
+        )
+        depends = depends.replace(':any', '')  # FIXME
+        if depends:
+            self.depends = deb.PkgRelation.parse_relations(depends)
+        else:
+            self.depends = []
+
+    def __repr__(self):
+        return '<Package {0.name}:{0.architecture}>'.format(self)
+
+    def __str__(self):
+        if self.architecture == 'all':
+            return self.name
+        else:
+            return '{name}:{architecture}'.format(**vars(self))
+
+def get_packages():
+    dpkg_architecture = get_dpkg_architecture()
+    cmdline = [
+        'dpkg-query',
+        '-Wf', '${Package}\t${Architecture}\t${Essential}\t${Provides}\t${Depends}\t${Pre-Depends}\n',
+        '*:all',
+        '*:{0}'.format(dpkg_architecture),  # multiarch is hard, let's go shopping
+    ]
+    output = ipc.check_output(cmdline)
+    pkginfo = output.decode('ASCII').splitlines()
+    packages = {}
+    for line in pkginfo:
+        name, architecture, essential, provides, depends, pre_depends = line.split('\t')
+        essential = essential == 'yes'
+        pkg = Package(name, architecture,
+            essential=essential,
+            depends=depends,
+            pre_depends=pre_depends
+        )
+        packages[name] = pkg
+        provides = [str(p) for p in provides.split(',')]
+        for name in provides:
+            packages[name] = pkg
+    return packages
+
+def create_apt_pool(packages, path):
+    cmdline = ['fakeroot', '-u', 'dpkg-repack'] + [str(p) for p in packages]
+    ipc.check_call(
+        cmdline,
+        preexec_fn=functools.partial(os.chdir, path)
+    )
+
+apt_ftparchive_config_template = r'''
+Dir {{
+    ArchiveDir "{path}";
+    CacheDir "{path}/cache/";
+}};
+
+TreeDefault {{
+    Directory "pool/";
+    Packages "$(DIST)/$(SECTION)/binary-$(ARCH)/Packages";
+}};
+
+Tree "dists/unstable" {{
+    Sections "main";
+    Architectures "{arch}";
+}}
+
+APT::FTPArchive::Release {{
+    Suite "unstable";
+    Codename "sid";
+    Origin "declonestrap";
+    Components "main";
+    Architectures "{arch} all";
+}}
+'''
+
+mkdir_p = functools.partial(os.makedirs, exist_ok=True)
+
+def rm_f(path):
+    try:
+        os.unlink(path)
+    except OSError as exc:
+        if exc.errno == errno.ENOENT:
+            return
+        raise
+
+def create_apt_archive(packages, path):
+    mkdir_p(path)
+    pool_path = '{root}/pool'.format(root=path)
+    if not os.path.exists(pool_path):
+        mkdir_p(pool_path)
+        create_apt_pool(packages, pool_path)
+    [architecture] = set(
+        pkg.architecture
+        for pkg in packages
+        if pkg.architecture != 'all'
+    )
+    config = apt_ftparchive_config_template.format(
+        path=path,
+        arch=architecture,
+    )
+    config_path = '{root}/config'.format(root=path)
+    with open(config_path, 'wt', encoding='ASCII') as config_file:
+        config_file.write(config)
+    cache_path = '{root}/cache'.format(root=path)
+    mkdir_p(cache_path)
+    dist_path = '{root}/dists/unstable'.format(root=path)
+    bin_dist_path = '{dist}/main/binary-{arch}'.format(dist=dist_path, arch=architecture)
+    mkdir_p(bin_dist_path)
+    cmdline = ['apt-ftparchive', 'generate', '--no-contents', config_path]
+    ipc.check_call(cmdline)
+    release_path = '{dist}/Release'.format(dist=dist_path)
+    rm_f(release_path)  # bug #317661
+    cmdline = ['apt-ftparchive', 'release',  '--config-file', config_path, dist_path]
+    output = ipc.check_output(cmdline)
+    with open(release_path, 'wb') as release:
+        release.write(output)
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument('aptdir', metavar='<apt-dir>')
+    option = ap.parse_args()
+    packages = get_packages()
+    essential_set = set(
+        pkg
+        for pkg in packages.values()
+        if pkg.essential
+    )
+    trans_essential_set = set()
+    todo = essential_set.copy()
+    while todo:
+        pkg = todo.pop()
+        for dep in pkg.depends:
+            # FIXME: take into account version constraints
+            for alt in dep:
+                try:
+                    dep = packages[alt['name']]
+                except KeyError:
+                    pass
+                else:
+                    break
+            else:
+                raise
+            if dep not in trans_essential_set:
+                todo.add(dep)
+        trans_essential_set.add(pkg)
+    create_apt_archive(trans_essential_set, option.aptdir)
+
+if __name__ == '__main__':
+    main()
+
+# vim:ts=4 sw=4 et
