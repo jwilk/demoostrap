@@ -24,8 +24,9 @@ import argparse
 import errno
 import functools
 import os
+import shutil
 import subprocess as ipc
-import sys
+import tempfile
 
 import debian.deb822 as deb
 
@@ -163,10 +164,31 @@ def create_apt_archive(packages, path):
     with open(release_path, 'wb') as release:
         release.write(output)
 
+def debootstrap(repository, target, *, no_root=False):
+    cmdline = [
+        '/usr/sbin/debootstrap',
+        '--no-check-gpg',
+        'unstable',
+        target,
+        'file:' + repository,
+    ]
+    if no_root:
+        cmdline[:0] = ['fakeroot', 'fakechroot']
+    ipc.check_call(cmdline)
+
+def error(message):
+    ap = argparse.ArgumentParser()
+    prog = ap.prog
+    message = ''.join((prog, ': error: ', message, '\n'))
+    ap.exit(1, message)
+
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('aptdir', metavar='<apt-dir>')
+    ap.add_argument('target', metavar='<target>')
+    ap.add_argument('-u', action='store_true', help='bootstrap as normal user')
     options = ap.parse_args()
+    if os.getuid() != 0 and not options.u:
+        error('can only run as root; maybe try -u?')
     packages = get_packages()
     essential_set = set(
         pkg
@@ -191,13 +213,12 @@ def main():
             if dep not in trans_essential_set:
                 todo.add(dep)
         trans_essential_set.add(pkg)
-    create_apt_archive(trans_essential_set, options.aptdir)
-    # FIXME:
-    print(
-        'demoostrap: error: actual deboostrapping is not implemented yet; try:\n'
-        '# debootstrap --no-check-gpg unstable <target> file:{root}'.format(root=os.path.abspath(options.aptdir))
-    )
-    sys.exit(1)
+    repository = tempfile.mkdtemp(prefix='demoostrap.', suffix='.apt')
+    try:
+        create_apt_archive(trans_essential_set, repository)
+        debootstrap(repository, options.target, no_root=options.u)
+    finally:
+        shutil.rmtree(repository)
 
 if __name__ == '__main__':
     main()
