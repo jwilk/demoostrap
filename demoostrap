@@ -160,7 +160,7 @@ def create_apt_archive(packages, path):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('aptdir', metavar='<apt-dir>')
-    option = ap.parse_args()
+    options = ap.parse_args()
     packages = get_packages()
     essential_set = set(
         pkg
@@ -185,11 +185,11 @@ def main():
             if dep not in trans_essential_set:
                 todo.add(dep)
         trans_essential_set.add(pkg)
-    create_apt_archive(trans_essential_set, option.aptdir)
+    create_apt_archive(trans_essential_set, options.aptdir)
     # FIXME:
     print(
         'demoostrap: error: actual deboostrapping is not implemented yet; try:\n'
-        '# debootstrap --no-check-gpg unstable <target> file:{root}'.format(root=os.path.abspath(option.aptdir))
+        '# debootstrap --no-check-gpg unstable <target> file:{root}'.format(root=os.path.abspath(options.aptdir))
     )
     sys.exit(1)
 
