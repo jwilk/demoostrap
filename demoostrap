@@ -25,6 +25,7 @@ import errno
 import functools
 import os
 import subprocess as ipc
+import sys
 
 import debian.deb822 as deb
 
@@ -185,6 +186,12 @@ def main():
                 todo.add(dep)
         trans_essential_set.add(pkg)
     create_apt_archive(trans_essential_set, option.aptdir)
+    # FIXME:
+    print(
+        'demoostrap: error: actual deboostrapping is not implemented yet; try:\n'
+        '# debootstrap --no-check-gpg unstable <target> file:{root}'.format(root=os.path.abspath(option.aptdir))
+    )
+    sys.exit(1)
 
 if __name__ == '__main__':
     main()
