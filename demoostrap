@@ -128,9 +128,8 @@ def rm_f(path):
 def create_apt_archive(packages, path):
     mkdir_p(path)
     pool_path = '{root}/pool'.format(root=path)
-    if not os.path.exists(pool_path):
-        mkdir_p(pool_path)
-        create_apt_pool(packages, pool_path)
+    mkdir_p(pool_path)
+    create_apt_pool(packages, pool_path)
     [architecture] = set(
         pkg.architecture
         for pkg in packages
