@@ -21,12 +21,12 @@ Dependencies
 
 
 .. _python3-debian:
-   http://packages.debian.org/unstable/python3-debian
+   https://packages.debian.org/unstable/python3-debian
 .. _apt-utils:
-   http://packages.debian.org/unstable/apt-utils
+   https://packages.debian.org/unstable/apt-utils
 .. _debootstrap:
-   http://packages.debian.org/unstable/debootstrap
+   https://packages.debian.org/unstable/debootstrap
 .. _dpkg-repack:
-   http://packages.debian.org/unstable/dpkg-repack
+   https://packages.debian.org/unstable/dpkg-repack
 
 .. vim:tw=72
