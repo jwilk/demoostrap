@@ -15,12 +15,15 @@ Dependencies
 ============
 
 * python3-debian_
+* apt-utils_
 * debootstrap_
 * dpkg-repack_
 
 
 .. _python3-debian:
    http://packages.debian.org/unstable/python3-debian
+.. _apt-utils:
+   http://packages.debian.org/unstable/apt-utils
 .. _debootstrap:
    http://packages.debian.org/unstable/debootstrap
 .. _dpkg-repack:
