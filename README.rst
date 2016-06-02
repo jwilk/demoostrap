@@ -14,11 +14,17 @@ it re-uses packages from the host system.
 Dependencies
 ============
 
+These packages are required:
+
 * python3-debian_
 * apt-utils_
 * debootstrap_
 * dpkg-repack_
 
+To boostrap as a non-root user, these packages are also needed:
+
+* fakeroot_
+* fakechroot_
 
 .. _python3-debian:
    https://packages.debian.org/unstable/python3-debian
@@ -28,5 +34,9 @@ Dependencies
    https://packages.debian.org/unstable/debootstrap
 .. _dpkg-repack:
    https://packages.debian.org/unstable/dpkg-repack
+.. _fakeroot:
+   https://packages.debian.org/unstable/fakeroot
+.. _fakechroot:
+   https://packages.debian.org/unstable/fakechroot
 
 .. vim:tw=72
