@@ -11,7 +11,7 @@ which can eventually be chrooted into.
    http://packages.debian.org/unstable/debootstrap
 
 **demoostrap** is a crazy debootstrap variant that works offline.
-Instead of downloading package from a mirror,
+Instead of downloading packages from a mirror,
 it re-uses packages from the host system.
 
 Dependencies
