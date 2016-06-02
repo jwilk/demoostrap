@@ -7,9 +7,6 @@ It does this by downloading ``.deb`` files from a mirror site,
 and carefully unpacking them into a directory
 which can eventually be chrooted into. 
 
-.. _debootstrap:
-   http://packages.debian.org/unstable/debootstrap
-
 **demoostrap** is a crazy debootstrap variant that works offline.
 Instead of downloading packages from a mirror,
 it re-uses packages from the host system.
@@ -21,6 +18,9 @@ Dependencies
 * debootstrap_
 * dpkg-repack_
 
+
+.. _debootstrap:
+   http://packages.debian.org/unstable/debootstrap
 .. _dpkg-repack:
    http://packages.debian.org/unstable/dpkg-repack
 
