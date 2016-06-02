@@ -5,7 +5,7 @@ and carefully unpacking them into a directory
 which can eventually be chrooted into. 
 
 .. _debootstrap:
-   http://packages.debian.org/unstable/deboostrap
+   http://packages.debian.org/unstable/debootstrap
 
 **demoostrap** is a crazy debootstrap variant that works offline.
 Instead of downloading package from a mirror,
