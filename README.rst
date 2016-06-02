@@ -14,11 +14,13 @@ it re-uses packages from the host system.
 Dependencies
 ============
 
-* Python 3
+* python3-debian_
 * debootstrap_
 * dpkg-repack_
 
 
+.. _python3-debian:
+   http://packages.debian.org/unstable/python3-debian
 .. _debootstrap:
    http://packages.debian.org/unstable/debootstrap
 .. _dpkg-repack:
