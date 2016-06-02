@@ -21,7 +21,7 @@ These packages are required:
 * debootstrap_
 * dpkg-repack_
 
-To boostrap as a non-root user, these packages are also needed:
+To bootstrap as a non-root user, these packages are also needed:
 
 * fakeroot_
 * fakechroot_
