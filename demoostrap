@@ -91,7 +91,9 @@ def create_apt_pool(packages, path):
         wrapper_file.write('#!/bin/sh\n')
         wrapper_file.write('exec /usr/bin/dpkg-deb -Znone "$@"\n')
     os.chmod(wrapper_path, 0o700)
-    cmdline = ['fakeroot', '-u', 'dpkg-repack'] + [str(p) for p in packages]
+    cmdline = ['dpkg-repack'] + [str(p) for p in packages]
+    if os.getuid() != 0:
+        cmdline[:0] = ['fakeroot', '-u']
     ipc.check_call(
         cmdline,
         preexec_fn=setup_dpkg_repack_env,
