@@ -161,7 +161,7 @@ def create_apt_archive(packages, path):
     ipc.check_call(cmdline)
     release_path = '{dist}/Release'.format(dist=dist_path)
     rm_f(release_path)  # bug #317661
-    cmdline = ['apt-ftparchive', 'release',  '--config-file', config_path, dist_path]
+    cmdline = ['apt-ftparchive', 'release', '--config-file', config_path, dist_path]
     output = ipc.check_output(cmdline)
     with open(release_path, 'wb') as release:
         release.write(output)
