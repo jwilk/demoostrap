@@ -5,7 +5,7 @@ debootstrap_ creates a Debian base system from scratch,
 without requiring the availability of *dpkg* or *APT*.
 It does this by downloading ``.deb`` files from a mirror site,
 and carefully unpacking them into a directory
-which can eventually be chrooted into. 
+which can eventually be chrooted into.
 
 **demoostrap** is a crazy debootstrap variant that works offline.
 Instead of downloading packages from a mirror,
