@@ -39,4 +39,4 @@ To bootstrap as a non-root user, these packages are also needed:
 .. _fakechroot:
    https://packages.debian.org/unstable/fakechroot
 
-.. vim:tw=72
+.. vim:tw=72 ft=rst
