@@ -119,7 +119,7 @@ Tree "dists/unstable" {{
 APT::FTPArchive::Release {{
     Suite "unstable";
     Codename "sid";
-    Origin "declonestrap";
+    Origin "demoostrap";
     Components "main";
     Architectures "{arch} all";
 }}
