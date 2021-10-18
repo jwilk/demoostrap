@@ -16,6 +16,7 @@ Dependencies
 
 These packages are required:
 
+* python3_ (≥ 3.6)
 * python3-debian_
 * apt-utils_
 * debootstrap_
@@ -26,6 +27,8 @@ To bootstrap as a non-root user, these packages are also needed:
 * fakeroot_
 * fakechroot_
 
+.. _python3:
+   https://packages.debian.org/unstable/python3
 .. _python3-debian:
    https://packages.debian.org/unstable/python3-debian
 .. _apt-utils:

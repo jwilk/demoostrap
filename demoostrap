@@ -30,6 +30,8 @@ import tempfile
 
 import debian.deb822 as deb
 
+0_0  # Python >= 3.6 is required
+
 def get_dpkg_architecture():
     cmdline = ['dpkg', '--print-architecture']
     output = ipc.check_output(cmdline)
