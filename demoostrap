@@ -76,7 +76,10 @@ def get_packages():
             pre_depends=pre_depends
         )
         packages[name] = pkg
-        provides = [str(p) for p in provides.split(',')]
+        provides = [
+            p.strip().split(' ', 1)[0]
+            for p in provides.split(',')
+        ]
         for name in provides:
             packages[name] = pkg
     return packages
