@@ -19,7 +19,7 @@ These packages are required:
 * python3-debian_
 * apt-utils_
 * debootstrap_
-* dpkg-repack_
+* dpkg-repack_ (≥ 1.40)
 
 To bootstrap as a non-root user, these packages are also needed:
 

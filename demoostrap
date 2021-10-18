@@ -82,23 +82,13 @@ def get_packages():
     return packages
 
 def create_apt_pool(packages, path):
-    def setup_dpkg_repack_env():
-        os.chdir(path)
-        os.environ['PATH'] = '.:' + os.environ['PATH']
-    wrapper_path = '{root}/dpkg-deb'.format(root=path)
-    with open(wrapper_path, 'wt', encoding='ASCII') as wrapper_file:
-        # work-around for bug #661953
-        wrapper_file.write('#!/bin/sh\n')
-        wrapper_file.write('exec /usr/bin/dpkg-deb -Znone "$@"\n')
-    os.chmod(wrapper_path, 0o700)
-    cmdline = ['dpkg-repack'] + [str(p) for p in packages]
+    cmdline = ['dpkg-repack', '-d', '-Znone'] + [str(p) for p in packages]
     if os.getuid() != 0:
         cmdline[:0] = ['fakeroot', '-u']
     ipc.check_call(
         cmdline,
-        preexec_fn=setup_dpkg_repack_env,
+        preexec_fn=functools.partial(os.chdir, path)
     )
-    os.unlink(wrapper_path)
 
 apt_ftparchive_config_template = r'''
 Dir {{
