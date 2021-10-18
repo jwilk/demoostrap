@@ -219,7 +219,8 @@ def main():
                 else:
                     break
             else:
-                raise
+                dep_str = ' | '.join(alt['name'] for alt in dep)
+                raise RuntimeError(f'Could not resolve dependency: {pkg} -> {dep_str}')
             if dep not in trans_base:
                 todo.add(dep)
         trans_base.add(pkg)
