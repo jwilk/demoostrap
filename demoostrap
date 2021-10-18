@@ -156,7 +156,7 @@ def create_apt_archive(packages, path):
     with open(release_path, 'wb') as release:
         release.write(output)
 
-def debootstrap(repository, target, *, no_root=False):
+def debootstrap(repository, target, *, include=None, no_root=False):
     cmdline = [
         '/usr/sbin/debootstrap',
         '--no-check-gpg',
@@ -164,6 +164,8 @@ def debootstrap(repository, target, *, no_root=False):
         target,
         'file:' + repository,
     ]
+    if include:
+        cmdline[1:1] = ['--include', include]
     if no_root:
         cmdline[:0] = ['fakeroot', 'fakechroot']
     ipc.check_call(cmdline)
@@ -182,6 +184,7 @@ def ensure_cmds_exist(*cmds):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('target', metavar='TARGET', help='bootstrap into this directory')
+    ap.add_argument('--include', metavar='PKG[,PKG...]', default='', help='install these packages too')
     ap.add_argument('-u', action='store_true', help='bootstrap as normal user')
     options = ap.parse_args()
     ensure_cmds_exist('dpkg-repack', 'apt-ftparchive', '/usr/sbin/debootstrap')
@@ -195,6 +198,10 @@ def main():
         for pkg in packages.values()
         if pkg.essential
     )
+    base |= {
+        packages[pkg]
+        for pkg in options.include.split(',')
+    }
     trans_base = set()
     todo = base.copy()
     while todo:
@@ -216,7 +223,7 @@ def main():
     repository = tempfile.mkdtemp(prefix='demoostrap.', suffix='.apt')
     try:
         create_apt_archive(trans_base, repository)
-        debootstrap(repository, options.target, no_root=options.u)
+        debootstrap(repository, options.target, include=options.include, no_root=options.u)
     finally:
         shutil.rmtree(repository)
 
