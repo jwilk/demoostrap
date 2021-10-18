@@ -186,7 +186,7 @@ def error(message):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('target', metavar='<target>', help='bootstrap into this directory')
+    ap.add_argument('target', metavar='TARGET', help='bootstrap into this directory')
     ap.add_argument('-u', action='store_true', help='bootstrap as normal user')
     options = ap.parse_args()
     if os.getuid() != 0 and not options.u:
