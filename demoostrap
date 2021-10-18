@@ -190,13 +190,13 @@ def main():
     if options.u:
         ensure_cmds_exist('fakeroot', 'fakechroot')
     packages = get_packages()
-    essential_set = set(
+    base = set(
         pkg
         for pkg in packages.values()
         if pkg.essential
     )
-    trans_essential_set = set()
-    todo = essential_set.copy()
+    trans_base = set()
+    todo = base.copy()
     while todo:
         pkg = todo.pop()
         for dep in pkg.depends:
@@ -210,12 +210,12 @@ def main():
                     break
             else:
                 raise
-            if dep not in trans_essential_set:
+            if dep not in trans_base:
                 todo.add(dep)
-        trans_essential_set.add(pkg)
+        trans_base.add(pkg)
     repository = tempfile.mkdtemp(prefix='demoostrap.', suffix='.apt')
     try:
-        create_apt_archive(trans_essential_set, repository)
+        create_apt_archive(trans_base, repository)
         debootstrap(repository, options.target, no_root=options.u)
     finally:
         shutil.rmtree(repository)
