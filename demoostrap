@@ -184,13 +184,21 @@ def error(message):
     message = ''.join((prog, ': error: ', message, '\n'))
     ap.exit(1, message)
 
+def ensure_cmds_exist(*cmds):
+    for cmd in cmds:
+        if shutil.which(cmd) is None:
+            error('command not found: ' + cmd)
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('target', metavar='TARGET', help='bootstrap into this directory')
     ap.add_argument('-u', action='store_true', help='bootstrap as normal user')
     options = ap.parse_args()
+    ensure_cmds_exist('dpkg-repack', 'apt-ftparchive', '/usr/sbin/debootstrap')
     if os.getuid() != 0 and not options.u:
         error('can only run as root; maybe try -u?')
+    if options.u:
+        ensure_cmds_exist('fakeroot', 'fakechroot')
     packages = get_packages()
     essential_set = set(
         pkg
