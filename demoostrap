@@ -57,7 +57,7 @@ class Package(object):
         if self.architecture == 'all':
             return self.name
         else:
-            return '{name}:{architecture}'.format(**vars(self))
+            return f'{self.name}:{self.architecture}'
 
 def get_packages():
     dpkg_architecture = get_dpkg_architecture()
@@ -65,7 +65,7 @@ def get_packages():
         'dpkg-query',
         '-Wf', '${Package}\t${Architecture}\t${Essential}\t${Provides}\t${Depends}\t${Pre-Depends}\n',
         '*:all',
-        '*:{0}'.format(dpkg_architecture),  # multiarch is hard, let's go shopping
+        f'*:{dpkg_architecture}',  # multiarch is hard, let's go shopping
     ]
     output = ipc.check_output(cmdline)
     pkginfo = output.decode('ASCII').splitlines()
@@ -134,7 +134,7 @@ def rm_f(path):
 def create_apt_archive(packages, path):
     root = path
     mkdir_p(root)
-    pool_path = '{root}/pool'.format(root=root)
+    pool_path = f'{root}/pool'
     mkdir_p(pool_path)
     create_apt_pool(packages, pool_path)
     [architecture] = set(
@@ -146,17 +146,17 @@ def create_apt_archive(packages, path):
         root=root,
         arch=architecture,
     )
-    config_path = '{root}/config'.format(root=root)
+    config_path = f'{root}/config'
     with open(config_path, 'wt', encoding='ASCII') as config_file:
         config_file.write(config)
-    cache_path = '{root}/cache'.format(root=root)
+    cache_path = f'{root}/cache'
     mkdir_p(cache_path)
-    dist_path = '{root}/dists/unstable'.format(root=root)
-    bin_dist_path = '{dist}/main/binary-{arch}'.format(dist=dist_path, arch=architecture)
+    dist_path = f'{root}/dists/unstable'
+    bin_dist_path = f'{dist_path}/main/binary-{architecture}'
     mkdir_p(bin_dist_path)
     cmdline = ['apt-ftparchive', 'generate', '--no-contents', config_path]
     ipc.check_call(cmdline)
-    release_path = '{dist}/Release'.format(dist=dist_path)
+    release_path = f'{dist_path}/Release'
     rm_f(release_path)  # bug #317661
     cmdline = ['apt-ftparchive', 'release', '--config-file', config_path, dist_path]
     output = ipc.check_output(cmdline)
