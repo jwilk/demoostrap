@@ -98,8 +98,8 @@ def create_apt_pool(packages, path):
 
 apt_ftparchive_config_template = r'''
 Dir {{
-    ArchiveDir "{path}";
-    CacheDir "{path}/cache/";
+    ArchiveDir "{root}";
+    CacheDir "{root}/cache/";
 }};
 
 TreeDefault {{
@@ -132,8 +132,9 @@ def rm_f(path):
         raise
 
 def create_apt_archive(packages, path):
-    mkdir_p(path)
-    pool_path = '{root}/pool'.format(root=path)
+    root = path
+    mkdir_p(root)
+    pool_path = '{root}/pool'.format(root=root)
     mkdir_p(pool_path)
     create_apt_pool(packages, pool_path)
     [architecture] = set(
@@ -142,15 +143,15 @@ def create_apt_archive(packages, path):
         if pkg.architecture != 'all'
     )
     config = apt_ftparchive_config_template.format(
-        path=path,
+        root=root,
         arch=architecture,
     )
-    config_path = '{root}/config'.format(root=path)
+    config_path = '{root}/config'.format(root=root)
     with open(config_path, 'wt', encoding='ASCII') as config_file:
         config_file.write(config)
-    cache_path = '{root}/cache'.format(root=path)
+    cache_path = '{root}/cache'.format(root=root)
     mkdir_p(cache_path)
-    dist_path = '{root}/dists/unstable'.format(root=path)
+    dist_path = '{root}/dists/unstable'.format(root=root)
     bin_dist_path = '{dist}/main/binary-{arch}'.format(dist=dist_path, arch=architecture)
     mkdir_p(bin_dist_path)
     cmdline = ['apt-ftparchive', 'generate', '--no-contents', config_path]
