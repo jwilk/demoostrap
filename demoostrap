@@ -24,6 +24,7 @@ import argparse
 import errno
 import functools
 import os
+import pathlib
 import shutil
 import subprocess as ipc
 import tempfile
@@ -186,6 +187,16 @@ def ensure_cmds_exist(*cmds):
         if shutil.which(cmd) is None:
             error('command not found: ' + cmd)
 
+def mkemptydir(path):
+    path = pathlib.Path(path)
+    try:
+        path.mkdir(exist_ok=True)
+    except OSError as exc:
+        error(f'{path}: {exc.strerror}')
+    with os.scandir(path) as scan_path:
+        for item in scan_path:
+            error(f'{path}: directory not empty')
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('target', metavar='TARGET', help='bootstrap into this directory')
@@ -197,6 +208,7 @@ def main():
         error('can only run as root; maybe try -u?')
     if options.u:
         ensure_cmds_exist('fakeroot', 'fakechroot')
+    mkemptydir(options.target)
     packages = get_packages()
     base = set(
         pkg
