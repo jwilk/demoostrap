@@ -38,7 +38,7 @@ def get_dpkg_architecture():
     output = ipc.check_output(cmdline)
     return output.strip().decode('ASCII')
 
-class Package(object):
+class Package():
 
     def __init__(self, name, architecture, *, essential=False, depends='', pre_depends=''):
         self.name = name
