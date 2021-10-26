@@ -56,8 +56,7 @@ class Package():
     def __str__(self):
         if self.architecture == 'all':
             return self.name
-        else:
-            return f'{self.name}:{self.architecture}'
+        return f'{self.name}:{self.architecture}'
 
 def get_packages():
     dpkg_architecture = get_dpkg_architecture()
