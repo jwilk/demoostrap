@@ -195,7 +195,7 @@ def mkemptydir(path):
     except OSError as exc:
         error(f'{path}: {exc.strerror}')
     with os.scandir(path) as scan_path:
-        for item in scan_path:
+        for _item in scan_path:
             error(f'{path}: directory not empty')
 
 def main():
