@@ -136,11 +136,11 @@ def create_apt_archive(packages, path):
     pool_path = f'{root}/pool'
     mkdir_p(pool_path)
     create_apt_pool(packages, pool_path)
-    [architecture] = set(
+    [architecture] = {
         pkg.architecture
         for pkg in packages
         if pkg.architecture != 'all'
-    )
+    }
     config = apt_ftparchive_config_template.format(
         root=root,
         arch=architecture,
@@ -210,11 +210,11 @@ def main():
         ensure_cmds_exist('fakeroot', 'fakechroot')
     mkemptydir(options.target)
     packages = get_packages()
-    base = set(
+    base = {
         pkg
         for pkg in packages.values()
         if pkg.essential
-    )
+    }
     base |= {
         packages[pkg]
         for pkg in options.include.split(',')
