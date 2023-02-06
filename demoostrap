@@ -44,9 +44,9 @@ class Package():
         self.name = name
         self.architecture = architecture
         self.essential = essential
-        depends = ', '.join(
+        depends = str.join(', ', (
             d for d in [depends, pre_depends] if d
-        )
+        ))
         depends = depends.replace(':any', '')  # FIXME
         if depends:
             self.depends = deb.PkgRelation.parse_relations(depends)
@@ -179,7 +179,7 @@ def debootstrap(repository, target, *, include=None, no_root=False):
 def error(message):
     ap = argparse.ArgumentParser()
     prog = ap.prog
-    message = ''.join((prog, ': error: ', message, '\n'))
+    message = str.join('', (prog, ': error: ', message, '\n'))
     ap.exit(1, message)
 
 def ensure_cmds_exist(*cmds):
@@ -233,7 +233,7 @@ def main():
                 else:
                     break
             else:
-                dep_str = ' | '.join(alt['name'] for alt in dep)
+                dep_str = str.join(' | ', (alt['name'] for alt in dep))
                 raise RuntimeError(f'Could not resolve dependency: {pkg} -> {dep_str}')
             if dep not in trans_base:
                 todo.add(dep)
