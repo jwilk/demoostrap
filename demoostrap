@@ -200,6 +200,7 @@ def mkemptydir(path):
 
 def main():
     ap = argparse.ArgumentParser()
+    ap.color = False
     ap.add_argument('target', metavar='TARGET', help='bootstrap into this directory')
     ap.add_argument('--include', metavar='PKG[,PKG...]', default='', help='install these packages too')
     ap.add_argument('-u', action='store_true', help='bootstrap as normal user')
